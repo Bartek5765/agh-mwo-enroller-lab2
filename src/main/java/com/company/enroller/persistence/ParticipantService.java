@@ -21,10 +21,17 @@ public class ParticipantService {
 
     public Collection<Participant> getAll(String sortBy, String sortOrder, String key) {
         String hql = "FROM Participant";
+        if (key != null && !key.isEmpty()) {
+            hql += " WHERE login LIKE '% " + key + "%'";
+            System.out.println("HQL: " + hql);
+        }
+
         if (sortBy != null && !sortBy.isEmpty()) {
             hql += " ORDER BY " + sortBy + " " + sortOrder;
             System.out.println("HQL: " + hql);
         }
+
+
 
         Query query = connector.getSession().createQuery(hql);
         return query.list();
