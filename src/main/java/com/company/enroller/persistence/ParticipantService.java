@@ -22,59 +22,17 @@ public class ParticipantService {
     public Collection<Participant> getAll(String sortBy, String sortOrder, String key) {
         String hql = "FROM Participant";
         if (key != null && !key.isEmpty()) {
-            hql += " WHERE login LIKE '%" + key + "%'";
-            System.out.println("HQL: " + hql);
+            hql += " WHERE login LIKE :key";
         }
-
-        if (sortBy != null && !sortBy.isEmpty()) {
-            hql += " ORDER BY " + sortBy + " " + sortOrder;
-            System.out.println("HQL: " + hql);
+        if ("login".equalsIgnoreCase(sortBy)) {
+            hql += " ORDER BY login " + ("DESC".equalsIgnoreCase(sortOrder) ? "DESC" : "ASC");
         }
-
-
-
         Query query = connector.getSession().createQuery(hql);
+        if (key != null && !key.isEmpty()) {
+            query.setParameter("key", "%" + key + "%");
+        }
         return query.list();
     }
-
-//    public List<Participant> getAll(String sortBy, String sortOrder, String key) {
-//
-//    }
-//        List<Participant> allParticipants = participantRepository.findAll();
-//        if (key != null && !key.isEmpty()) {
-//            allParticipants = allParticipants.stream().filter(p -> p.getLogin().contains(key)).collect(Collectors.toList());
-//        }
-//        if ("login".equalsIgnoreCase(sortBy)) {
-//            if ("DESC".equalsIgnoreCase(sortOrder)) {
-//                allParticipants.sort((p1, p2) -> p2.getLogin().compareTo(p1.getLogin()));
-//            } else {
-//                allParticipants.sort(Comparator.comparing(Participant::getLogin));
-//            }
-//        }
-//        return allParticipants;
-//    }
-
-
-//    public List<Participant> getAllParticipants(String sortBy, String sortOrder, String key) {
-//        List<Participant> result = getAllParticipants(sortBy, sortOrder, key);
-//
-//        if (!key.isEmpty()) {
-//            result = result.stream()
-//                    .filter(p -> p.getLogin().contains(key))
-//                    .collect(Collectors.toList());
-//        }
-//
-//        if (!sortBy.isEmpty() && sortBy.equals("login")) {
-//            Comparator<Participant> comparator = Comparator.comparing(Participant::getLogin);
-//            if ("DESC".equalsIgnoreCase(sortOrder)) {
-//                comparator = comparator.reversed();
-//            }
-//            result = result.stream().sorted(comparator).collect(Collectors.toList());
-//        }
-//        return result;
-//    }
-
-
 
 
     public Participant findByLogin(String login) {
@@ -82,25 +40,22 @@ public class ParticipantService {
     }
 
     public Participant add(Participant participant) {
-        Transaction transaction = connector.getSession().beginTransaction();
+        Transaction tx = connector.getSession().beginTransaction();
         connector.getSession().save(participant);
-        transaction.commit();
+        tx.commit();
         return participant;
     }
 
     public void update(Participant participant) {
-        Transaction transaction = connector.getSession().beginTransaction();
+        Transaction tx = connector.getSession().beginTransaction();
         connector.getSession().merge(participant);
-        transaction.commit();
+        tx.commit();
     }
 
     public void delete(Participant participant) {
-        Transaction transaction = connector.getSession().beginTransaction();
+        Transaction tx = connector.getSession().beginTransaction();
         connector.getSession().delete(participant);
-        transaction.commit();
+        tx.commit();
     }
-
-
-
-
 }
+
